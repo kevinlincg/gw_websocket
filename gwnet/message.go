@@ -1,4 +1,4 @@
-package netw
+package gwnet
 
 //Message 消息
 // 跟前端實際溝通的內容，msgId用來當type，data是任意struct封裝後的資料

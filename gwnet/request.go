@@ -1,15 +1,15 @@
-package netw
+package gwnet
 
-import "github.com/kevinlincg/gw_websocket/iface"
+import "github.com/kevinlincg/gw_websocket/gwiface"
 
 //Request 請求
 type Request struct {
-	conn iface.Connection //已經跟client建立好的連線
-	msg  iface.Message    //client端請求的資料
+	conn gwiface.Connection //已經跟client建立好的連線
+	msg  gwiface.Message    //client端請求的資料
 }
 
 //GetConnection 取得connection
-func (r *Request) GetConnection() iface.Connection {
+func (r *Request) GetConnection() gwiface.Connection {
 	return r.conn
 }
 

@@ -1,4 +1,4 @@
-package iface
+package gwiface
 
 /*
 	Router主邏輯，一個邏輯定義一個struct來處理

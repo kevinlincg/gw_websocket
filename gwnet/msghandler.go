@@ -1,30 +1,30 @@
-package netw
+package gwnet
 
 import (
 	"strconv"
 
-	"github.com/kevinlincg/gw_websocket/iface"
+	"github.com/kevinlincg/gw_websocket/gwiface"
 
 	"go.uber.org/zap"
 )
 
 // MsgHandle -
 type MsgHandle struct {
-	Apis           map[uint32]iface.Router // 每個MsgID對應的處理方法
+	Apis           map[uint32]gwiface.Router // 每個MsgID對應的處理方法
 	WorkerPoolSize uint32
-	TaskQueue      []chan iface.Request // Worker負責取任務的Queue
+	TaskQueue      []chan gwiface.Request // Worker負責取任務的Queue
 }
 
 func NewMsgHandle() *MsgHandle {
 	return &MsgHandle{
-		Apis:           make(map[uint32]iface.Router),
+		Apis:           make(map[uint32]gwiface.Router),
 		WorkerPoolSize: config.WorkerPoolSize,
 		// 一個Worker對應一個Queue
-		TaskQueue: make([]chan iface.Request, config.WorkerPoolSize),
+		TaskQueue: make([]chan gwiface.Request, config.WorkerPoolSize),
 	}
 }
 
-func (mh MsgHandle) DoMsgHandler(request iface.Request) {
+func (mh MsgHandle) DoMsgHandler(request gwiface.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			zap.S().Error("Call err: ", err)
@@ -40,7 +40,7 @@ func (mh MsgHandle) DoMsgHandler(request iface.Request) {
 	handler.PostHandle(request)
 }
 
-func (mh MsgHandle) AddRouter(msgID uint32, router iface.Router) {
+func (mh MsgHandle) AddRouter(msgID uint32, router gwiface.Router) {
 	if _, ok := mh.Apis[msgID]; ok {
 		panic("repeated api , msgID = " + strconv.Itoa(int(msgID)))
 	}
@@ -49,16 +49,16 @@ func (mh MsgHandle) AddRouter(msgID uint32, router iface.Router) {
 
 func (mh MsgHandle) StartWorkerPool() {
 	for i := 0; i < int(mh.WorkerPoolSize); i++ {
-		mh.TaskQueue[i] = make(chan iface.Request, 1)
+		mh.TaskQueue[i] = make(chan gwiface.Request, 1)
 		go mh.StartOneWorker(i, mh.TaskQueue[i])
 	}
 }
-func (mh MsgHandle) SendMsgToTaskQueue(request iface.Request) {
+func (mh MsgHandle) SendMsgToTaskQueue(request gwiface.Request) {
 	workerID := uint32(request.GetConnection().GetConnID()) % mh.WorkerPoolSize
 	mh.TaskQueue[workerID] <- request
 }
 
-func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan iface.Request) {
+func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan gwiface.Request) {
 	zap.S().Debug("Worker ID = ", workerID, " is started.")
 	for {
 		select {

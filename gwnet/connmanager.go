@@ -1,35 +1,35 @@
-package netw
+package gwnet
 
 import (
 	"errors"
-	"github.com/kevinlincg/gw_websocket/iface"
+	"github.com/kevinlincg/gw_websocket/gwiface"
 	"sync"
 )
 
 type ConnManager struct {
-	connections map[int64]iface.Connection
+	connections map[int64]gwiface.Connection
 	connLock    sync.RWMutex
 }
 
 func NewConnManager() *ConnManager {
 	return &ConnManager{
-		connections: make(map[int64]iface.Connection),
+		connections: make(map[int64]gwiface.Connection),
 	}
 }
 
-func (connMgr *ConnManager) Add(conn iface.Connection) {
+func (connMgr *ConnManager) Add(conn gwiface.Connection) {
 	connMgr.connLock.Lock()
 	defer connMgr.connLock.Unlock()
 	connMgr.connections[conn.GetConnID()] = conn
 }
 
-func (connMgr *ConnManager) Remove(conn iface.Connection) {
+func (connMgr *ConnManager) Remove(conn gwiface.Connection) {
 	connMgr.connLock.Lock()
 	defer connMgr.connLock.Unlock()
 	delete(connMgr.connections, conn.GetConnID())
 }
 
-func (connMgr *ConnManager) Get(connID int64) (iface.Connection, error) {
+func (connMgr *ConnManager) Get(connID int64) (gwiface.Connection, error) {
 	connMgr.connLock.RLock()
 	defer connMgr.connLock.RUnlock()
 	if conn, ok := connMgr.connections[connID]; ok {
@@ -54,7 +54,7 @@ func (connMgr *ConnManager) ClearConn() {
 	}
 }
 
-func (connMgr *ConnManager) Search(s iface.Search) {
+func (connMgr *ConnManager) Search(s gwiface.Search) {
 	connMgr.connLock.Lock()
 	defer connMgr.connLock.Unlock()
 	for _, conn := range connMgr.connections {

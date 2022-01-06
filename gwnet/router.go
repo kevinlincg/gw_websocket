@@ -1,6 +1,6 @@
-package netw
+package gwnet
 
-import "github.com/kevinlincg/gw_websocket/iface"
+import "github.com/kevinlincg/gw_websocket/gwiface"
 
 // BaseRouter 要實現router時，先內崁這個基礎類別，然後根據需要對這個基本類別的function重寫
 type BaseRouter struct{}
@@ -10,10 +10,10 @@ type BaseRouter struct{}
 // 所以Router全部繼承BaseRouter的好處是，不用重新實作一次PreHandle和PostHandle也可以
 
 // PreHandle -
-func (br *BaseRouter) PreHandle(req iface.Request) {}
+func (br *BaseRouter) PreHandle(req gwiface.Request) {}
 
 // Handle -
-func (br *BaseRouter) Handle(req iface.Request) {}
+func (br *BaseRouter) Handle(req gwiface.Request) {}
 
 // PostHandle -
-func (br *BaseRouter) PostHandle(req iface.Request) {}
+func (br *BaseRouter) PostHandle(req gwiface.Request) {}

@@ -1,7 +1,7 @@
-package netw
+package gwnet
 
 import (
-	"github.com/kevinlincg/gw_websocket/iface"
+	"github.com/kevinlincg/gw_websocket/gwiface"
 	"net/http"
 	"sync/atomic"
 
@@ -20,25 +20,25 @@ var (
 			return true
 		},
 	}
-	GlobalServer iface.Server
+	GlobalServer gwiface.Server
 )
 
 // Server interface的實現，定義一個Server的類型
 type Server struct {
 	sesIDGen int64 // 紀錄最新的ConnID，ConnID用流水號產生
 
-	msgHandler iface.MsgHandle
+	msgHandler gwiface.MsgHandle
 
-	ConnMgr iface.ConnManager
+	ConnMgr gwiface.ConnManager
 
-	OnConnStart func(conn iface.Connection)
-	OnConnStop  func(conn iface.Connection)
+	OnConnStart func(conn gwiface.Connection)
+	OnConnStop  func(conn gwiface.Connection)
 
-	packet iface.Packet
+	packet gwiface.Packet
 }
 
 // NewServer 建立一個Server
-func NewServer(opt ...Option) iface.Server {
+func NewServer(opt ...Option) gwiface.Server {
 	s := &Server{
 		msgHandler: NewMsgHandle(),
 		ConnMgr:    NewConnManager(),
@@ -81,34 +81,34 @@ func (s *Server) Serve(c *gin.Context) {
 	select {}
 }
 
-func (s *Server) AddRouter(msgID uint32, router iface.Router) {
+func (s *Server) AddRouter(msgID uint32, router gwiface.Router) {
 	s.msgHandler.AddRouter(msgID, router)
 }
 
-func (s *Server) GetConnMgr() iface.ConnManager {
+func (s *Server) GetConnMgr() gwiface.ConnManager {
 	return s.ConnMgr
 }
 
-func (s *Server) SetOnConnStart(hookFunc func(iface.Connection)) {
+func (s *Server) SetOnConnStart(hookFunc func(gwiface.Connection)) {
 	s.OnConnStart = hookFunc
 }
 
-func (s *Server) SetOnConnStop(hookFunc func(iface.Connection)) {
+func (s *Server) SetOnConnStop(hookFunc func(gwiface.Connection)) {
 	s.OnConnStop = hookFunc
 }
 
-func (s *Server) CallOnConnStart(conn iface.Connection) {
+func (s *Server) CallOnConnStart(conn gwiface.Connection) {
 	if s.OnConnStart != nil {
 		s.OnConnStart(conn)
 	}
 }
 
-func (s *Server) CallOnConnStop(conn iface.Connection) {
+func (s *Server) CallOnConnStop(conn gwiface.Connection) {
 	if s.OnConnStop != nil {
 		s.OnConnStop(conn)
 	}
 }
 
-func (s *Server) Packet() iface.Packet {
+func (s *Server) Packet() gwiface.Packet {
 	return s.packet
 }

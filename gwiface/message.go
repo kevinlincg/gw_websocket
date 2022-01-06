@@ -1,4 +1,4 @@
-package iface
+package gwiface
 
 /*
 	把Request的Message封裝到這個Message裡面用的

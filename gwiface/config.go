@@ -1,4 +1,4 @@
-package iface
+package gwiface
 
 type Config struct {
 	PingTime       int    // HeartBeat檢查的時間

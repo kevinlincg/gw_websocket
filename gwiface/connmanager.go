@@ -1,4 +1,4 @@
-package iface
+package gwiface
 
 /*
 	Connection的管理器 interface

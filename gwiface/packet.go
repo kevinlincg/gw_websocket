@@ -1,4 +1,4 @@
-package iface
+package gwiface
 
 /*
 	封包跟拆包封包的資料用的

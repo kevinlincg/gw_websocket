@@ -1,4 +1,4 @@
-package netw
+package gwnet
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kevinlincg/gw_websocket/iface"
+	"github.com/kevinlincg/gw_websocket/gwiface"
 
 	"go.uber.org/zap"
 
@@ -16,13 +16,13 @@ import (
 
 // Connection
 type Connection struct {
-	Server iface.Server //這個連線屬於哪一個Server
+	Server gwiface.Server //這個連線屬於哪一個Server
 
 	Conn *websocket.Conn //本連線的websocket底層結構
 
 	ConnID int64 //ConnectionID可以當成SessionID，應該要唯一的
 
-	MsgHandler iface.MsgHandle //管理Msg的處理
+	MsgHandler gwiface.MsgHandle //管理Msg的處理
 
 	Heartbeat             bool //用來給Timer檢查是否有心跳
 	OfflineHeartBeatCount int  //已經累積幾次沒有心跳，超過n次要把他斷線
@@ -40,7 +40,7 @@ type Connection struct {
 }
 
 // NewConnection 建立一個新的Connection，有新用戶連上時都會新建
-func NewConnection(s iface.Server, conn *websocket.Conn, connID int64, msgHandler iface.MsgHandle) *Connection {
+func NewConnection(s gwiface.Server, conn *websocket.Conn, connID int64, msgHandler gwiface.MsgHandle) *Connection {
 	// 初始化Conn属性
 	c := &Connection{
 		Server:     s,

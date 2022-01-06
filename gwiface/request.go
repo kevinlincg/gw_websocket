@@ -1,4 +1,4 @@
-package iface
+package gwiface
 
 /*
 	Request 接口：

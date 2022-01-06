@@ -1,4 +1,4 @@
-package iface
+package gwiface
 
 /*
 	Msg管理器的封裝

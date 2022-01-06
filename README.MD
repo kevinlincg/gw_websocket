@@ -3,14 +3,14 @@
 ## 使用方式:
 
 ```
-	netw.SetConfig(&iface.Config{
+	gwnet.SetConfig(&iface.Config{
 		PingTime:       30,
 		MaxConn:        100000,
 		WorkerPoolSize: 10,
 		MessageType:    2,
 	})
 	
-	s := netw.NewServer(netw.WithPacket(pack.NewDataPack()))
+	s := gwnet.NewServer(gwnet.WithPacket(pack.NewDataPack()))
 	
 	//會根據封包的第一個int來分type進不同function處理
 	s.AddRouter(0, &router.StartGame{})
