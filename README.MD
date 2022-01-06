@@ -8,6 +8,7 @@
 		MaxConn:        100000,
 		WorkerPoolSize: 10,
 		MessageType:    2,
+		WriteDeadlineDelay: 30,
 	})
 	
 	s := gwnet.NewServer(gwnet.WithPacket(pack.NewDataPack()))

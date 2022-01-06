@@ -37,6 +37,8 @@ type Connection struct {
 	propertyLock sync.Mutex
 
 	isClosed bool //連線已經關閉
+
+	writeWait time.Duration
 }
 
 // NewConnection 建立一個新的Connection，有新用戶連上時都會新建
@@ -51,10 +53,12 @@ func NewConnection(s gwiface.Server, conn *websocket.Conn, connID int64, msgHand
 		Heartbeat:  false,
 		msgChan:    make(chan []byte, 1),
 		property:   nil,
+		writeWait:  time.Duration(config.WriteDeadlineDelay) * time.Second,
 	}
 	// 把新的Connection加入ConnMgr
 	c.Server.GetConnMgr().Add(c)
 	c.IsHeartbeatTimeout()
+
 	return c
 }
 
@@ -66,6 +70,7 @@ func (c *Connection) StartWriter() {
 		select {
 		case data := <-c.msgChan:
 			// data coming
+			c.Conn.SetWriteDeadline(time.Now().Add(c.writeWait))
 			if err := c.Conn.WriteMessage(config.MessageType, data); err != nil {
 				zap.S().Error("Send Data error:, ", err, " Conn Writer exit")
 				return
@@ -183,7 +188,7 @@ func (c *Connection) SendMsg(msgID uint32, data []byte) error {
 	dp := c.Server.Packet()
 	msg, err := dp.Pack(NewMsgPackage(msgID, data))
 	if err != nil {
-		zap.S().Error("pack error msg ID = ", msgID)
+		zap.S().Error("pack error msg = ", msgID, data)
 		return errors.New("pack error msg ")
 	}
 

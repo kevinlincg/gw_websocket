@@ -28,4 +28,8 @@ type Config struct {
 	//PongMessage = 10
 	//一般使用應該用1或2就好
 	MessageType int
+
+	//gorilla/websocket 的SetWriteDeadline
+	//c.Conn.SetWriteDeadline(time.Now().Add(WriteDeadlineDelay*time.Second))
+	WriteDeadlineDelay int
 }
