@@ -7,69 +7,62 @@ import (
 )
 
 type ConnManager struct {
-	connections map[int64]gwiface.Connection
-	connLock    sync.RWMutex
+	connections sync.Map
 }
 
 func NewConnManager() *ConnManager {
-	return &ConnManager{
-		connections: make(map[int64]gwiface.Connection),
-	}
+	return &ConnManager{}
 }
 
 func (connMgr *ConnManager) Add(conn gwiface.Connection) {
-	connMgr.connLock.Lock()
-	defer connMgr.connLock.Unlock()
-	connMgr.connections[conn.GetConnID()] = conn
+	connMgr.connections.Store(conn.GetConnID(), conn)
 }
 
 func (connMgr *ConnManager) Remove(conn gwiface.Connection) {
-	connMgr.connLock.Lock()
-	defer connMgr.connLock.Unlock()
-	delete(connMgr.connections, conn.GetConnID())
+	connMgr.connections.Delete(conn.GetConnID())
 }
 
 func (connMgr *ConnManager) Get(connID int64) (gwiface.Connection, error) {
-	connMgr.connLock.RLock()
-	defer connMgr.connLock.RUnlock()
-	if conn, ok := connMgr.connections[connID]; ok {
-		return conn, nil
+	value, ok := connMgr.connections.Load(connID)
+	if !ok {
+		return nil, errors.New("connection not found")
 	}
-	return nil, errors.New("connection not found")
+	return value.(gwiface.Connection), nil
 }
 
 func (connMgr *ConnManager) Len() int {
-	connMgr.connLock.RLock()
-	defer connMgr.connLock.RUnlock()
-	length := len(connMgr.connections)
+	var length int
+	connMgr.connections.Range(func(k, v interface{}) bool {
+		length++
+		return true
+	})
 	return length
 }
 
 func (connMgr *ConnManager) ClearConn() {
-	connMgr.connLock.Lock()
-	defer connMgr.connLock.Unlock()
-	for connID, conn := range connMgr.connections {
-		conn.Stop()
-		delete(connMgr.connections, connID)
-	}
+	connMgr.connections.Range(func(key, iConn interface{}) bool {
+		iConn.(gwiface.Connection).Stop()
+		connMgr.connections.Delete(key)
+		return true
+	})
 }
 
 func (connMgr *ConnManager) Search(s gwiface.Search) {
-	connMgr.connLock.Lock()
-	defer connMgr.connLock.Unlock()
-	for _, conn := range connMgr.connections {
-		s(conn)
-	}
+	connMgr.connections.Range(func(_, iConn interface{}) bool {
+		if conn := iConn.(gwiface.Connection); conn != nil {
+			func() {
+				s(conn)
+			}()
+		}
+		return true // Continue to next item
+	})
 }
 
 func (connMgr *ConnManager) ClearOneConn(connID int64) {
-	connMgr.connLock.Lock()
-	defer connMgr.connLock.Unlock()
-	connections := connMgr.connections
-	if conn, ok := connections[connID]; ok {
+	value, ok := connMgr.connections.Load(connID)
+	if ok {
+		conn := value.(gwiface.Connection)
 		conn.Stop()
-		delete(connections, connID)
-		return
+		connMgr.connections.Delete(connID)
 	}
-	return
 }
